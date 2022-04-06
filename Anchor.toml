@@ -5,8 +5,8 @@ example1 = "7CiTJHXzv7SdK1bf14nmCnPg9c8HRs3H9DdfEJMoay5K"
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "localnet"
-wallet = "/Users/naderdabit/.config/solana/id.json"
+cluster = "devnet"
+wallet = "/home/user/.config/solana/id.json"
 
 [scripts]
 test = "mocha -t 1000000 tests/"

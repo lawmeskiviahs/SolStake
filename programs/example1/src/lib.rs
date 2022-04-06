@@ -1,33 +1,39 @@
 use anchor_lang::prelude::*;
-// use anchor_spl::token::{self, Mint, TokenAccount, Transfer, MintTo};
+use solana_program::entrypoint::ProgramResult;
+use solana_safe_math::{SafeMath};
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
     // entrypoint,
     // entrypoint::ProgramResult,
     msg,
-    program_error::ProgramError,
     pubkey::Pubkey,
-    program::invoke,
+    // program::invoke,
     system_instruction,
 };
 
 declare_id!("4Y8PGKfY7q5hxDA17h6UHk5eACo6k9idy1chiHb7HKsp");
 
+pub static INVEST_MIN_AMOUNT:u64 = 1; 
+// Time step
+// pub mut plans = vec![];
+pub static PROJECT_FEE:u64 = 100;
+pub static PERCENT_STEP:u64 = 5;
+pub static PERCENTS_DIVIDER:u64 = 1000;
+pub static REFERRAL_PERCENTS:[u64;3]=[50, 25, 5];
+
 #[program]
 mod example1 {
     use super::*;
     pub fn init(ctx :Context <Init>) -> ProgramResult {
-        let plan = &mut ctx.accounts.plans;
+        msg!("Initialize");
+        // let plan = &mut ctx.accounts.plans;
+        let pool = &mut ctx.accounts.vault;
         let mut x:[Plan;6];
-        // let owner:Pubkey=;
-        let seed = "LazyInvestor2";
-        // let pubkey= Pubkey::;
-        // let vault = Pubkey::create_with_seed(base, seed, owner)?;
         Ok(())
     }
     pub fn deposit(ctx: Context<DepositCTX>, amount: u64) -> ProgramResult {
         
-        let user = &ctx.accounts.pool;
+        let user = &ctx.accounts.depositor;
         let pool = &mut ctx.accounts.vault;
         anchor_lang::solana_program::program::invoke(
             &system_instruction::transfer(
@@ -40,19 +46,32 @@ mod example1 {
                 pool.to_account_info(),
             ],
         )?;
+        
+        let mut fee = amount.safe_mul(PROJECT_FEE)?;
+        fee = fee.safe_div(PERCENTS_DIVIDER)?;
+        //(transfer sol to commissioner wallet)
+
+        // if (user.referrer) {
+		// 	if (users[referrer].deposits.length > 0 && referrer != msg.sender) {
+		// 		user.referrer = referrer;
+		// }
+
         Ok(())
     }
-    // pub fn withdraw() -> ProgramResult {
+    // pub fn withdraw(ctx: Context<WithdrawCTX>) -> ProgramResult {
+    //     let plans:
     //     Ok(())
     // }
 }
 
 #[derive(Accounts)]
 pub struct Init<'info> {
+    // #[account(init, payer=user, space=264)]
+    // pub plans: Account<'info, Plan>,
     #[account(init, payer=user, space=264)]
-    pub plans: Account<'info, Plan>,
+    pub users: Account<'info, Mapping>,
     #[account(init, payer=user, space=264)]
-    pub wallet_account_mapping: Account<'info, Mapping>,
+    pub vault: Account<'info, Vault>,
     #[account(mut)]
     pub user:Signer<'info>,
     pub system_program: Program<'info, System>
@@ -64,16 +83,15 @@ pub struct Plan {
 }
 #[account]
 pub struct Mapping {
-    userWalletPubKey : Pubkey,
-    userAccountPubKey : Pubkey
+    user : Vec<MyAccount>
 }
 
 #[derive(Accounts)]
 pub struct DepositCTX<'info> {
     #[account(mut)]
     depositor: Account<'info, MyAccount>,
-    // #[account(mut)]
-    // refferrer: Account<'info, MyAccount>,
+    #[account()]
+    pub vault: Account<'info, Vault>,
 }
 #[account]
 pub struct MyAccount {
