@@ -13,13 +13,13 @@ use solana_program::{
 
 declare_id!("4Y8PGKfY7q5hxDA17h6UHk5eACo6k9idy1chiHb7HKsp");
 
-pub static INVEST_MIN_AMOUNT:u64 = 1; 
+pub const INVEST_MIN_AMOUNT:u64 = 1; 
 // Time step
 // pub mut plans = vec![];
-pub static PROJECT_FEE:u64 = 100;
-pub static PERCENT_STEP:u64 = 5;
-pub static PERCENTS_DIVIDER:u64 = 1000;
-pub static REFERRAL_PERCENTS:[u64;3]=[50, 25, 5];
+pub const PROJECT_FEE:u64 = 100;
+pub const PERCENT_STEP:u64 = 5;
+pub const PERCENTS_DIVIDER:u64 = 1000;
+pub const REFERRAL_PERCENTS:[u64;3]=[50, 25, 5];
 
 #[program]
 mod example1 {
@@ -28,7 +28,6 @@ mod example1 {
         msg!("Initialize");
         // let plan = &mut ctx.accounts.plans;
         let pool = &mut ctx.accounts.vault;
-        let mut x:[Plan;6];
         Ok(())
     }
     pub fn deposit(ctx: Context<DepositCTX>, amount: u64) -> ProgramResult {
@@ -44,30 +43,27 @@ mod example1 {
             &[
                 user.to_account_info(),
                 pool.to_account_info(),
-            ],
-        )?;
-        
-        let mut fee = amount.safe_mul(PROJECT_FEE)?;
-        fee = fee.safe_div(PERCENTS_DIVIDER)?;
-        //(transfer sol to commissioner wallet)
-
-        // if (user.referrer) {
-		// 	if (users[referrer].deposits.length > 0 && referrer != msg.sender) {
-		// 		user.referrer = referrer;
-		// }
-
-        Ok(())
+                ],
+            )?;
+            let mut fee = amount.safe_mul(PROJECT_FEE)?;
+            fee = fee.safe_div(PERCENTS_DIVIDER)?;
+            //(transfer sol to commissioner wallet)
+            
+            // if (user.referrer) {
+                // 	if (users[referrer].deposits.length > 0 && referrer != msg.sender) {
+                    // 		user.referrer = referrer;
+                    // }
+                    
+                    Ok(())
+            }
+                // pub fn withdraw(ctx: Context<WithdrawCTX>) -> ProgramResult {
+                //     let mut plans:[Plan;6];
+                //         Ok(())
+                // }
     }
-    // pub fn withdraw(ctx: Context<WithdrawCTX>) -> ProgramResult {
-    //     let plans:
-    //     Ok(())
-    // }
-}
-
-#[derive(Accounts)]
-pub struct Init<'info> {
-    // #[account(init, payer=user, space=264)]
-    // pub plans: Account<'info, Plan>,
+                
+    #[derive(Accounts)]
+    pub struct Init<'info> {
     #[account(init, payer=user, space=264)]
     pub users: Account<'info, Mapping>,
     #[account(init, payer=user, space=264)]
@@ -79,10 +75,12 @@ pub struct Init<'info> {
 #[account]
 pub struct Plan {
     time : u64,
-    percent : u8
+    percent : u16
 }
+#[derive()]
 #[account]
 pub struct Mapping {
+
     user : Vec<MyAccount>
 }
 
